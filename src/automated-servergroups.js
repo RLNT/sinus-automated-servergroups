@@ -358,7 +358,10 @@ registerPlugin(
         // LOADING EVENT
         event.on('load', () => {
             // dev mode config dump
-            if (config.dev) console.log(Object.entries(config));
+            if (config.dev) {
+                console.log('Script-Config:', Object.entries(scriptConfig));
+                console.log('Validated-Config:', Object.entries(config));
+            }
 
             // error prevention that needs script deactivation
             if ((!config.groupsAdd || !config.groupsAdd.length) && (!config.groupsRemove || !config.groupsRemove.length)) {
@@ -389,6 +392,12 @@ registerPlugin(
             // VARIABLES
             const groupsAdd = validateGroups(config.groupsAdd);
             const groupsRemove = validateGroups(config.groupsRemove);
+
+            // validated groups config dump
+            if (config.dev) {
+                console.log('groupsAdd:', Object.entries(groupsAdd));
+                console.log('groupsRemove:', Object.entries(groupsRemove));
+            }
 
             /**
              * SERVER GROUP ADDED EVENT
