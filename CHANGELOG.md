@@ -11,7 +11,14 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
-## [1.0.0] - 2020-09-23
+## [2.1.0] - 2020-10-06
+
+### Added
+- new option to define if events should be recognized if the bot assigned/removed the trigger group(s) itself
+- more output if the dev mode is activated to find issues faster
+
+
+## [2.0.0] - 2020-09-23
 
 - initial release of the rewrite
 
@@ -22,6 +29,7 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/RLNT/sinus-automated-servergroups/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0...HEAD
 [Released]: https://github.com/RLNT/sinus-automated-servergroups/releases
-[1.0.0]: https://github.com/RLNT/sinus-automated-servergroups/releases/v1.0.0
+[2.1.0]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0..v2.1.0
+[2.0.0]: https://github.com/RLNT/sinus-automated-servergroups/releases/v2.0.0
