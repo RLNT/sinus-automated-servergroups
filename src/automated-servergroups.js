@@ -8,14 +8,14 @@
 registerPlugin(
     {
         name: 'Automated Servergroups',
-        version: '2.0.0',
+        version: '2.1.0',
         description: 'With this script, the bot will automatically assign or remove servergroups on specific events.',
         author: 'RLNT',
         backends: ['ts3'],
         vars: [
             {
                 name: 'required',
-                title: 'All fields that are marked with (*) are required, fields with [*] are semi-required and all others are optional and have a default value.'
+                title: 'All fields that are marked with (*) are required, all others are optional and have a default value.'
             },
             {
                 name: 'spacer0',
@@ -49,6 +49,13 @@ registerPlugin(
                         type: 'select',
                         indent: 1,
                         options: ['all trigger groups have to be added/removed', 'at least one trigger group has to be added/removed']
+                    },
+                    {
+                        name: 'triggerBot',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot assigned the trigger group(s) itself?',
+                        type: 'select',
+                        indent: 1,
+                        options: ['Yes', 'No']
                     },
                     {
                         name: 'advancedConditions',
@@ -121,6 +128,13 @@ registerPlugin(
                         type: 'select',
                         indent: 1,
                         options: ['all trigger groups have to be added/removed', 'at least one trigger group has to be added/removed']
+                    },
+                    {
+                        name: 'triggerBot',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot removed the trigger group(s) itself?',
+                        type: 'select',
+                        indent: 1,
+                        options: ['Yes', 'No']
                     },
                     {
                         name: 'advancedConditions',
@@ -305,8 +319,6 @@ registerPlugin(
          */
         function handleEvent(event, trigger, groupsAdd, groupsRemove) {
             const client = event.client;
-            if (client.isSelf()) return;
-            if (event.invoker.isSelf()) return;
 
             // get all server group IDs the client has
             const clientGroups = client.getServerGroups().map(serverGroup => serverGroup.id());
@@ -317,6 +329,8 @@ registerPlugin(
             groupsAdd.forEach(group => {
                 // skip if the trigger is set to the opposite of the event
                 if (group.trigger == trigger) return;
+                // check if the the trigger group was assigned by the bot itself
+                if (group.triggerBot && client.isSelf()) return;
                 // check if the client has at least one relevant servergroup
                 if (!group.triggerGroups.some(group => group === serverGroupID)) return;
                 // check if the client is blacklisted in any way
@@ -331,6 +345,7 @@ registerPlugin(
 
             groupsRemove.forEach(group => {
                 if (group.trigger == trigger) return;
+                if (group.triggerBot && client.isSelf()) return;
                 if (!group.triggerGroups.some(group => group === serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
@@ -343,7 +358,10 @@ registerPlugin(
         // LOADING EVENT
         event.on('load', () => {
             // dev mode config dump
-            if (config.dev) console.log(Object.entries(config));
+            if (config.dev) {
+                console.log('Script-Config:', Object.entries(scriptConfig));
+                console.log('Validated-Config:', Object.entries(config));
+            }
 
             // error prevention that needs script deactivation
             if ((!config.groupsAdd || !config.groupsAdd.length) && (!config.groupsRemove || !config.groupsRemove.length)) {
@@ -374,6 +392,12 @@ registerPlugin(
             // VARIABLES
             const groupsAdd = validateGroups(config.groupsAdd);
             const groupsRemove = validateGroups(config.groupsRemove);
+
+            // validated groups config dump
+            if (config.dev) {
+                console.log('groupsAdd:', Object.entries(groupsAdd));
+                console.log('groupsRemove:', Object.entries(groupsRemove));
+            }
 
             /**
              * SERVER GROUP ADDED EVENT
