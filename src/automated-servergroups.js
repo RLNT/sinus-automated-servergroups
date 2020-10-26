@@ -8,7 +8,7 @@
 registerPlugin(
     {
         name: 'Automated Servergroups',
-        version: '2.1.0',
+        version: '2.1.1',
         description: 'With this script, the bot will automatically assign or remove servergroups on specific events.',
         author: 'RLNT',
         backends: ['ts3'],
@@ -169,7 +169,7 @@ registerPlugin(
                     },
                     {
                         name: 'groups',
-                        title: 'Groups > Define a list of group IDs that should be added on the event! (*)',
+                        title: 'Groups > Define a list of group IDs that should be removed on the event! (*)',
                         type: 'strings',
                         indent: 1
                     }

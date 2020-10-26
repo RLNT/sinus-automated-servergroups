@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [2.1.1] - 2020-10-26
+
+### Fixed
+- config option description to avoid confusion
+
+
 ## [2.1.0] - 2020-10-06
 
 ### Added
@@ -31,5 +37,6 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 <!-- Versions -->
 [Unreleased]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0...HEAD
 [Released]: https://github.com/RLNT/sinus-automated-servergroups/releases
+[2.1.1]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.1.0..v2.1.1
 [2.1.0]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0..v2.1.0
 [2.0.0]: https://github.com/RLNT/sinus-automated-servergroups/releases/v2.0.0
