@@ -169,7 +169,7 @@ registerPlugin(
                     },
                     {
                         name: 'groups',
-                        title: 'Groups > Define a list of group IDs that should be added on the event! (*)',
+                        title: 'Groups > Define a list of group IDs that should be removed on the event! (*)',
                         type: 'strings',
                         indent: 1
                     }
