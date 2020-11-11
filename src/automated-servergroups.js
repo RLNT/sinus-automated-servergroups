@@ -331,7 +331,7 @@ registerPlugin(
             const invoker = event.invoker;
 
             // get all server group IDs the client has
-            const clientGroups = client.getServerGroups().map(serverGroup => serverGroup.id());
+            const clientGroups = client.getServerGroups().map(group => group.id());
             // save the id of the servergroup from the event
             const serverGroupID = event.serverGroup.id();
 
@@ -342,7 +342,7 @@ registerPlugin(
                 // check if the the trigger group was assigned by the bot itself
                 if (group.triggerBot && invoker.isSelf()) return;
                 // check if the client has at least one relevant servergroup
-                if (!group.triggerGroups.some(group => group === serverGroupID)) return;
+                if (!group.triggerGroups.includes(serverGroupID)) return;
                 // check if the client is blacklisted in any way
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
@@ -356,7 +356,7 @@ registerPlugin(
             groupsRemove.forEach(group => {
                 if (group.trigger == trigger) return;
                 if (group.triggerBot && invoker.isSelf()) return;
-                if (!group.triggerGroups.some(group => group === serverGroupID)) return;
+                if (!group.triggerGroups.includes(serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
                 if (group.triggerCondition == 0 && !group.triggerGroups.some(triggerGroup => triggerGroup !== serverGroupID && !clientGroups.includes(triggerGroup))) return;
