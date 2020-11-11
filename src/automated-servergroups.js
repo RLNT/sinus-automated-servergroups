@@ -8,7 +8,7 @@
 registerPlugin(
     {
         name: 'Automated Servergroups',
-        version: '2.1.1',
+        version: '2.2.0',
         description: 'With this script, the bot will automatically assign or remove servergroups on specific events.',
         author: 'RLNT',
         backends: ['ts3'],
@@ -52,7 +52,7 @@ registerPlugin(
                     },
                     {
                         name: 'triggerBot',
-                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot assigned the trigger group(s) itself?',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot assigned the trigger group(s)?',
                         type: 'select',
                         indent: 1,
                         options: ['Yes', 'No']
@@ -131,7 +131,7 @@ registerPlugin(
                     },
                     {
                         name: 'triggerBot',
-                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot removed the trigger group(s) itself?',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot removed the trigger group(s)?',
                         type: 'select',
                         indent: 1,
                         options: ['Yes', 'No']
@@ -252,33 +252,40 @@ registerPlugin(
          */
         function validateGroups(groups) {
             let validatedGroups = [];
+            let problemGroups = [];
 
-            groups.forEach(group => {
-                // skip group if required fields are not set
-                if (!group.trigger) return;
-                if (!group.triggerGroups || !group.triggerGroups.length) return;
-                if (!group.groups) return;
+            groups.forEach((group, index) => {
+                // check if necessary config options are set
+                if (!group.trigger) return problemGroups.push(index);
+                if (!group.triggerGroups || !group.triggerGroups.length) return problemGroups.push(index);
+                if (!group.groups) return problemGroups.push(index);
 
-                // apply default values to other fields
+                // apply defaults
                 group.triggerCondition = group.triggerCondition || 0;
                 group.advancedConditions = group.advancedConditions == 0 || false;
                 group.blacklistClients = group.advancedConditions ? group.blacklistClients || [] : false;
                 group.blacklistGroups = group.advancedConditions ? group.blacklistGroups || [] : false;
 
-                // filter groups if they are valid servergroups
-                group.triggerGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-                group.groups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-                if (group.blacklistGroups.length) group.blacklistGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-
-                // check again if required fields are set
-                if (!group.triggerGroups.length || !group.groups.length) return;
+                // check if group ids point to valid groups on teamspeak
+                group.triggerGroups = group.triggerGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
+                if (!group.triggerGroups.length) return problemGroups.push(index);
+                group.groups = group.groups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
+                if (!group.groups.length) return problemGroups.push(index);
+                if (group.blacklistGroups.length) group.blacklistGroups = group.blacklistGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
 
                 // deactivate advanced conditions if non are set
                 if (group.advancedConditions && !group.blacklistClients.length && !group.blacklistGroups.length) group.advancedConditions = false;
 
-                // add validated group to new array
+                // if all error checks passed, mark it as valid
                 validatedGroups.push(group);
             });
+
+            // notify the script user that there are invalid groups in the configuration
+            if (problemGroups.length)
+                log(
+                    "There was at least one entry in your configuration which is invalid! This can happen if a required field is empty or if your group IDs don't point to a valid group on your TeamSpeak server! Any invalid entries will be skipped. The entries with the following indexes are invalid: " +
+                        problemGroups
+                );
 
             return validatedGroups;
         }
@@ -290,8 +297,9 @@ registerPlugin(
          * @returns {void} > nothing
          */
         function addToGroups(client, groups) {
+            const clientGroups = client.getServerGroups().map(group => group.id());
             groups.forEach(group => {
-                client.addToServerGroup(group);
+                if (!clientGroups.includes(group)) client.addToServerGroup(group);
             });
         }
 
@@ -302,8 +310,9 @@ registerPlugin(
          * @returns {void} > nothing
          */
         function removeFromGroups(client, groups) {
+            const clientGroups = client.getServerGroups().map(group => group.id());
             groups.forEach(group => {
-                client.removeFromServerGroup(group);
+                if (clientGroups.includes(group)) client.removeFromServerGroup(group);
             });
         }
 
@@ -319,9 +328,10 @@ registerPlugin(
          */
         function handleEvent(event, trigger, groupsAdd, groupsRemove) {
             const client = event.client;
+            const invoker = event.invoker;
 
             // get all server group IDs the client has
-            const clientGroups = client.getServerGroups().map(serverGroup => serverGroup.id());
+            const clientGroups = client.getServerGroups().map(group => group.id());
             // save the id of the servergroup from the event
             const serverGroupID = event.serverGroup.id();
 
@@ -330,9 +340,9 @@ registerPlugin(
                 // skip if the trigger is set to the opposite of the event
                 if (group.trigger == trigger) return;
                 // check if the the trigger group was assigned by the bot itself
-                if (group.triggerBot && client.isSelf()) return;
+                if (group.triggerBot && invoker.isSelf()) return;
                 // check if the client has at least one relevant servergroup
-                if (!group.triggerGroups.some(group => group === serverGroupID)) return;
+                if (!group.triggerGroups.includes(serverGroupID)) return;
                 // check if the client is blacklisted in any way
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
@@ -345,11 +355,11 @@ registerPlugin(
 
             groupsRemove.forEach(group => {
                 if (group.trigger == trigger) return;
-                if (group.triggerBot && client.isSelf()) return;
-                if (!group.triggerGroups.some(group => group === serverGroupID)) return;
+                if (group.triggerBot && invoker.isSelf()) return;
+                if (!group.triggerGroups.includes(serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
-                if (group.triggerCondition == 0 && !group.triggerGroups.some(triggerGroup => triggerGroup !== serverGroupID && !clientGroups.includes(triggerGroup))) return;
+                if (group.triggerCondition == 0 && group.triggerGroups.some(triggerGroup => triggerGroup !== serverGroupID && clientGroups.includes(triggerGroup))) return;
 
                 removeFromGroups(client, group.groups);
             });
@@ -392,6 +402,9 @@ registerPlugin(
             // VARIABLES
             const groupsAdd = validateGroups(config.groupsAdd);
             const groupsRemove = validateGroups(config.groupsRemove);
+
+            // exit the script if no valid holiday groups were found
+            if (!groupsAdd.length && !groupsRemove.length) return log('There are no valid groups set in your script configuration! There might be further output in the log. Deactivating script...');
 
             // validated groups config dump
             if (config.dev) {
