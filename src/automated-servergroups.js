@@ -297,8 +297,9 @@ registerPlugin(
          * @returns {void} > nothing
          */
         function addToGroups(client, groups) {
+            const clientGroups = client.getServerGroups().map(group => group.id());
             groups.forEach(group => {
-                client.addToServerGroup(group);
+                if (!clientGroups.includes(group)) client.addToServerGroup(group);
             });
         }
 
@@ -309,8 +310,9 @@ registerPlugin(
          * @returns {void} > nothing
          */
         function removeFromGroups(client, groups) {
+            const clientGroups = client.getServerGroups().map(group => group.id());
             groups.forEach(group => {
-                client.removeFromServerGroup(group);
+                if (clientGroups.includes(group)) client.removeFromServerGroup(group);
             });
         }
 
