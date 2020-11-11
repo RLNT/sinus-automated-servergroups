@@ -359,7 +359,7 @@ registerPlugin(
                 if (!group.triggerGroups.includes(serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
-                if (group.triggerCondition == 0 && !group.triggerGroups.some(triggerGroup => triggerGroup !== serverGroupID && !clientGroups.includes(triggerGroup))) return;
+                if (group.triggerCondition == 0 && group.triggerGroups.some(triggerGroup => triggerGroup !== serverGroupID && clientGroups.includes(triggerGroup))) return;
 
                 removeFromGroups(client, group.groups);
             });
