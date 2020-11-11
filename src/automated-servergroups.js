@@ -252,33 +252,40 @@ registerPlugin(
          */
         function validateGroups(groups) {
             let validatedGroups = [];
+            let problemGroups = [];
 
-            groups.forEach(group => {
-                // skip group if required fields are not set
-                if (!group.trigger) return;
-                if (!group.triggerGroups || !group.triggerGroups.length) return;
-                if (!group.groups) return;
+            groups.forEach((group, index) => {
+                // check if necessary config options are set
+                if (!group.trigger) return problemGroups.push(index);
+                if (!group.triggerGroups || !group.triggerGroups.length) return problemGroups.push(index);
+                if (!group.groups) return problemGroups.push(index);
 
-                // apply default values to other fields
+                // apply defaults
                 group.triggerCondition = group.triggerCondition || 0;
                 group.advancedConditions = group.advancedConditions == 0 || false;
                 group.blacklistClients = group.advancedConditions ? group.blacklistClients || [] : false;
                 group.blacklistGroups = group.advancedConditions ? group.blacklistGroups || [] : false;
 
-                // filter groups if they are valid servergroups
-                group.triggerGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-                group.groups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-                if (group.blacklistGroups.length) group.blacklistGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
-
-                // check again if required fields are set
-                if (!group.triggerGroups.length || !group.groups.length) return;
+                // check if group ids point to valid groups on teamspeak
+                group.triggerGroups = group.triggerGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
+                if (!group.triggerGroups.length) return problemGroups.push(index);
+                group.groups = group.groups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
+                if (!group.groups.length) return problemGroups.push(index);
+                if (group.blacklistGroups.length) group.blacklistGroups = group.blacklistGroups.filter(gid => backend.getServerGroupByID(gid) !== undefined);
 
                 // deactivate advanced conditions if non are set
                 if (group.advancedConditions && !group.blacklistClients.length && !group.blacklistGroups.length) group.advancedConditions = false;
 
-                // add validated group to new array
+                // if all error checks passed, mark it as valid
                 validatedGroups.push(group);
             });
+
+            // notify the script user that there are invalid groups in the configuration
+            if (problemGroups.length)
+                log(
+                    "There was at least one entry in your configuration which is invalid! This can happen if a required field is empty or if your group IDs don't point to a valid group on your TeamSpeak server! Any invalid entries will be skipped. The entries with the following indexes are invalid: " +
+                        problemGroups
+                );
 
             return validatedGroups;
         }
@@ -393,6 +400,9 @@ registerPlugin(
             // VARIABLES
             const groupsAdd = validateGroups(config.groupsAdd);
             const groupsRemove = validateGroups(config.groupsRemove);
+
+            // exit the script if no valid holiday groups were found
+            if (!groupsAdd.length && !groupsRemove.length) return log('There are no valid groups set in your script configuration! There might be further output in the log. Deactivating script...');
 
             // validated groups config dump
             if (config.dev) {
