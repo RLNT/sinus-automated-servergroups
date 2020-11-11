@@ -52,7 +52,7 @@ registerPlugin(
                     },
                     {
                         name: 'triggerBot',
-                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot assigned the trigger group(s) itself?',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot assigned the trigger group(s)?',
                         type: 'select',
                         indent: 1,
                         options: ['Yes', 'No']
@@ -131,7 +131,7 @@ registerPlugin(
                     },
                     {
                         name: 'triggerBot',
-                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot removed the trigger group(s) itself?',
+                        title: 'Trigger-Bot > Do you want the event to be triggered even if the bot removed the trigger group(s)?',
                         type: 'select',
                         indent: 1,
                         options: ['Yes', 'No']
@@ -319,6 +319,7 @@ registerPlugin(
          */
         function handleEvent(event, trigger, groupsAdd, groupsRemove) {
             const client = event.client;
+            const invoker = event.invoker;
 
             // get all server group IDs the client has
             const clientGroups = client.getServerGroups().map(serverGroup => serverGroup.id());
@@ -330,7 +331,7 @@ registerPlugin(
                 // skip if the trigger is set to the opposite of the event
                 if (group.trigger == trigger) return;
                 // check if the the trigger group was assigned by the bot itself
-                if (group.triggerBot && client.isSelf()) return;
+                if (group.triggerBot && invoker.isSelf()) return;
                 // check if the client has at least one relevant servergroup
                 if (!group.triggerGroups.some(group => group === serverGroupID)) return;
                 // check if the client is blacklisted in any way
@@ -345,7 +346,7 @@ registerPlugin(
 
             groupsRemove.forEach(group => {
                 if (group.trigger == trigger) return;
-                if (group.triggerBot && client.isSelf()) return;
+                if (group.triggerBot && invoker.isSelf()) return;
                 if (!group.triggerGroups.some(group => group === serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;
