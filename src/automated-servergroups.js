@@ -8,7 +8,7 @@
 registerPlugin(
     {
         name: 'Automated Servergroups',
-        version: '2.2.0',
+        version: '2.2.1',
         description: 'With this script, the bot will automatically assign or remove servergroups on specific events.',
         author: 'RLNT',
         backends: ['ts3'],
@@ -262,6 +262,7 @@ registerPlugin(
 
                 // apply defaults
                 group.triggerCondition = group.triggerCondition || 0;
+                group.triggerBot = group.triggerBot == 0 || false;
                 group.advancedConditions = group.advancedConditions == 0 || false;
                 group.blacklistClients = group.advancedConditions ? group.blacklistClients || [] : false;
                 group.blacklistGroups = group.advancedConditions ? group.blacklistGroups || [] : false;
@@ -340,7 +341,7 @@ registerPlugin(
                 // skip if the trigger is set to the opposite of the event
                 if (group.trigger == trigger) return;
                 // check if the the trigger group was assigned by the bot itself
-                if (group.triggerBot && invoker.isSelf()) return;
+                if (!group.triggerBot && invoker.isSelf()) return;
                 // check if the client has at least one relevant servergroup
                 if (!group.triggerGroups.includes(serverGroupID)) return;
                 // check if the client is blacklisted in any way
@@ -355,7 +356,7 @@ registerPlugin(
 
             groupsRemove.forEach(group => {
                 if (group.trigger == trigger) return;
-                if (group.triggerBot && invoker.isSelf()) return;
+                if (!group.triggerBot && invoker.isSelf()) return;
                 if (!group.triggerGroups.includes(serverGroupID)) return;
                 if (group.advancedConditions && group.blacklistClients.includes(client.uid())) return;
                 if (group.advancedConditions && group.blacklistGroups.some(blacklistGroup => clientGroups.includes(blacklistGroup))) return;

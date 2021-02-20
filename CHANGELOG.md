@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [2.2.1] - 2021-02-20
+
+### Fixed
+- bot invoker logic
+
+
 ## [2.2.0] - 2020-11-11
 
 ### Added
@@ -51,6 +57,7 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 <!-- Versions -->
 [Unreleased]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0...HEAD
 [Released]: https://github.com/RLNT/sinus-automated-servergroups/releases
+[2.2.1]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.2.0..v2.2.1
 [2.2.0]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.1.1..v2.2.0
 [2.1.1]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.1.0..v2.1.1
 [2.1.0]: https://github.com/RLNT/sinus-automated-servergroups/compare/v2.0.0..v2.1.0
