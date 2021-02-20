@@ -262,6 +262,7 @@ registerPlugin(
 
                 // apply defaults
                 group.triggerCondition = group.triggerCondition || 0;
+                group.triggerBot = group.triggerBot == 0 || false;
                 group.advancedConditions = group.advancedConditions == 0 || false;
                 group.blacklistClients = group.advancedConditions ? group.blacklistClients || [] : false;
                 group.blacklistGroups = group.advancedConditions ? group.blacklistGroups || [] : false;
