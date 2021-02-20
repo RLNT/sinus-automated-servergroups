@@ -8,7 +8,7 @@
 registerPlugin(
     {
         name: 'Automated Servergroups',
-        version: '2.2.0',
+        version: '2.2.1',
         description: 'With this script, the bot will automatically assign or remove servergroups on specific events.',
         author: 'RLNT',
         backends: ['ts3'],
